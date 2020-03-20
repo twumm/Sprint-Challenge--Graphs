@@ -25,9 +25,42 @@ world.print_rooms()
 
 player = Player(world.starting_room)
 
+def generate_moves(map):
+    # create a dictionary of directions for easy reversing
+    opposite_directions = {'n': 's', 's': 'n', 'e': 'w', 'w': 'e'}
+    # create list to contain the directions that will make it possible to visit
+    # a room at least once when traversed
+    moves = []
+    # create list to hold opposite directions of room
+    paths = []
+    # create a dictionary to keep track of all rooms from the map
+    rooms_visited = {}
+    # initialize first rooms
+    rooms_visited[player.current_room.id] = player.current_room.get_exits()
+
+    # traverse through the map till rooms_visited is equal or more than the map node
+    while len(rooms_visited) < len(map) - 1:
+        if player.current_room.id not in rooms_visited:
+            # get exits
+            rooms_visited[player.current_room.id] = player.current_room.get_exits()
+            # flip exits 
+            last_direction = paths[-1]
+            rooms_visited[player.current_room.id].remove(last_direction)
+        while len(rooms_visited[player.current_room.id]) == 0:
+            reverse_path = paths.pop()
+            moves.append(reverse_path)
+            # travel to get next room
+            player.travel(reverse_path)
+        exit_direction = rooms_visited[player.current_room.id].pop(0)
+        moves.append(exit_direction)
+        paths.append(opposite_directions[exit_direction])
+        # travel to get next room
+        player.travel(exit_direction)
+    return moves
+
 # Fill this out with directions to walk
 # traversal_path = ['n', 'n']
-traversal_path = []
+traversal_path = generate_moves(room_graph)
 
 
 
